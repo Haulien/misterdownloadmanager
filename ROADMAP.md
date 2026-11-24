@@ -574,6 +574,10 @@ These ship in the next version.
   several rows, which Space or the right-click menu's **Check** / **Uncheck** tick or untick
   together ([#973](https://github.com/anefzaoui/misterdownloadmanager/discussions/973),
   [#972](https://github.com/anefzaoui/misterdownloadmanager/discussions/972))
+- ✅ Tests: the check that one download's IP family never changes another download of the same
+  host no longer fails now and then (seen on a Windows runner): it took for granted that the
+  first download, slowed down, was still running when the second one ended; the test server now
+  holds the first one's part until the second one has ended, then lets it finish
 - ✅ Torrents: an optional public tracker list (ngosang/trackerslist's best, or an address you
   give) added to public torrents, those already in the list and those added, fetched once a day
   (an hour after a failed fetch) through MDM's own downloader, its last good copy kept; never
