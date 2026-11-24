@@ -1144,7 +1144,8 @@ impl Grabber {
         self.rows = st;
         // Ctrl-click adds or drops a row, Shift-click (and Shift with the arrows) picks a run,
         // Ctrl+A picks them all (#715), as in the download list.
-        let mods = ui.input(|i| i.modifiers);
+        // As the click had them, even in a slow frame (#1734).
+        let mods = crate::list::click_modifiers(ui);
         if let Some(k) = ev.clicked.or(ev.picked.filter(|_| ev.context.is_none())) {
             let at = rows[k];
             if mods.shift {
@@ -1198,15 +1199,13 @@ impl Grabber {
         let mut group = None;
         if let Some(at) = self.menu {
             let any = !self.marked.is_empty();
+            // i18n: Link grabber, right-click menu of the highlighted rows: tick them (their links will be downloaded)
+            let check = crate::i18n::mark("&Check");
+            // i18n: Link grabber, right-click menu of the highlighted rows: untick them (their links will be left out)
+            let uncheck = crate::i18n::mark("&Uncheck");
             let entries = [
-                MenuEntry::Item(
-                    // i18n: Link grabber, right-click menu of the highlighted rows: tick them (their links will be downloaded)
-                    "&Check", true, any, false,
-                ),
-                MenuEntry::Item(
-                    // i18n: Link grabber, right-click menu of the highlighted rows: untick them (their links will be left out)
-                    "&Uncheck", false, any, false,
-                ),
+                MenuEntry::Item(check, true, any, false),
+                MenuEntry::Item(uncheck, false, any, false),
             ];
             match crate::chrome::popup(
                 ui.ctx(),
