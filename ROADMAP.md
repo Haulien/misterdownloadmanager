@@ -569,6 +569,11 @@ Bug fixes from the first days of 0.5.0, a Safari extension, and more file types.
 
 These ship in the next version.
 
+- ✅ Link grabber's window can be resized: the list takes the room it gains, and it opens at the
+  size it was left at; Ctrl-click, Shift-click (and Shift with the arrows) and Ctrl+A highlight
+  several rows, which Space or the right-click menu's **Check** / **Uncheck** tick or untick
+  together ([#973](https://github.com/anefzaoui/misterdownloadmanager/discussions/973),
+  [#972](https://github.com/anefzaoui/misterdownloadmanager/discussions/972))
 - ✅ Torrents: an optional public tracker list (ngosang/trackerslist's best, or an address you
   give) added to public torrents, those already in the list and those added, fetched once a day
   (an hour after a failed fetch) through MDM's own downloader, its last good copy kept; never
