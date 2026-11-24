@@ -569,8 +569,8 @@ Bug fixes from the first days of 0.5.0, a Safari extension, and more file types.
 
 These ship in the next version.
 
-- ✅ Link grabber's window can be resized: the list takes the room it gains, and it opens at the
-  size it was left at; Ctrl-click, Shift-click (and Shift with the arrows) and Ctrl+A highlight
+- ✅ Link grabber's window can be resized and maximized: the list takes the room it gains, and it
+  opens at the size it was left at; Ctrl-click, Shift-click (and Shift with the arrows) and Ctrl+A highlight
   several rows, which Space or the right-click menu's **Check** / **Uncheck** tick or untick
   together ([#973](https://github.com/anefzaoui/misterdownloadmanager/discussions/973),
   [#972](https://github.com/anefzaoui/misterdownloadmanager/discussions/972))

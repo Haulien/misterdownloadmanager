@@ -709,7 +709,8 @@ fn dialog_window<T>(
         // resizes keeps them.
         .with_resizable(drawn || sizable)
         .with_minimize_button(minimize)
-        .with_maximize_button(false);
+        // One the user resizes can fill the screen too.
+        .with_maximize_button(sizable);
     if let Some(least) = least {
         builder = builder.with_min_inner_size([least[0], least[1] + caption_h]);
     }
@@ -761,6 +762,10 @@ fn dialog_window<T>(
                 if drawn {
                     use crate::winui::caption::CaptionButton;
                     let mut buttons = vec![(CaptionButton::Close, true)];
+                    // Maximize (Restore while maximized), as the main window's.
+                    if sizable {
+                        buttons.push((CaptionButton::Maximize, true));
+                    }
                     if minimize {
                         buttons.push((CaptionButton::Minimize, true));
                     }
@@ -768,6 +773,7 @@ fn dialog_window<T>(
                     match drawn_title(ui, origin, shown[0], title, &buttons, hwnd) {
                         Some(CaptionButton::Close) => caption_close = true,
                         Some(CaptionButton::Minimize) => crate::dialogs::minimize(ui.ctx(), hwnd),
+                        Some(CaptionButton::Maximize) => toggle_maximized(ui.ctx(), hwnd),
                         _ => {}
                     }
                 }
@@ -922,8 +928,18 @@ pub fn drawn_title(
     buttons: &[(crate::winui::caption::CaptionButton, bool)],
     hwnd: Option<isize>,
 ) -> Option<crate::winui::caption::CaptionButton> {
-    use crate::winui::caption::CAPTION_H;
+    use crate::winui::caption::{CAPTION_H, CaptionButton};
     let rect = egui::Rect::from_min_size(o, egui::vec2(width, CAPTION_H));
+    // A Maximize button is the frame's (Windows 11's Snap Layouts open over it): the system
+    // hovers and presses it, and the bar draws what it says (as the main window's).
+    let max_at = buttons
+        .iter()
+        .position(|(b, _)| *b == CaptionButton::Maximize);
+    #[cfg(windows)]
+    if let (Some(_), Some(h)) = (max_at, hwnd) {
+        let m = crate::win32::max_button_state(h);
+        crate::winui::caption::frame_maximize(m.hot, m.pressed);
+    }
     let bar = crate::winui::caption::title_bar(ui, rect, title, buttons);
     #[cfg(windows)]
     if let Some(hwnd) = hwnd {
@@ -943,13 +959,26 @@ pub fn drawn_title(
                 strip_h: (CAPTION_H * ppp).round() as i32,
                 icon: px(bar.icon),
                 buttons: bar.buttons.iter().map(|r| px(*r)).collect(),
-                max_button: None,
+                max_button: max_at,
             },
         );
     }
     #[cfg(not(windows))]
-    let _ = hwnd;
+    let _ = (hwnd, max_at);
     bar.pressed
+}
+
+/// Maximize the window (`hwnd` once its frame is applied), or restore it while it is: the
+/// system's command, as the frame's own Maximize sends it (#874).
+fn toggle_maximized(ctx: &egui::Context, hwnd: Option<isize>) {
+    #[cfg(windows)]
+    if let Some(h) = hwnd {
+        crate::win32::toggle_maximized(h);
+        return;
+    }
+    let _ = hwnd;
+    let max = ctx.input(|i| i.viewport().maximized) == Some(true);
+    ctx.send_viewport_cmd(egui::ViewportCommand::Maximized(!max));
 }
 
 /// Whether the window manager asked this window to close (its title bar's ×, Alt+F4, a

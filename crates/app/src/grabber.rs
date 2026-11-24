@@ -734,7 +734,10 @@ impl Grabber {
             true,
             LIGHT_BG(),
             |ui, o, size| {
-                self.size = size;
+                // Maximized, it is still left at the size it was given (as Windows restores it).
+                if ui.ctx().input(|i| i.viewport().maximized) != Some(true) {
+                    self.size = size;
+                }
                 self.body(ui, o, size)
             },
         );
